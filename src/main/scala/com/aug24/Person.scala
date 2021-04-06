@@ -45,17 +45,7 @@ trait Person extends Actor with ActorLogging {
     if (getInfected()) {
       println(s"$this is infected")
       val location = this.getLocation()
-      val infecteesFuture = (locator ? Locate(location)).mapTo[List[ActorRef]]
-      infecteesFuture.onComplete { 
-        case Success(infectees) =>
-          infectees.map(
-            infectee => {
-              println(s"Infecting $infectee")
-              infectee ! Infect
-            }
-          )
-        case Failure(error) => println(s"Error: $error")
-      }
+      val infecteesFuture = locator ! Locate(location)
     } else {
       println(s"$this is not infected")
     }

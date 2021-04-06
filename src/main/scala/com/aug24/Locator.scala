@@ -15,21 +15,25 @@ class Locator extends Actor with ActorLogging {
 
   def moved(location:Location) = locations += (sender -> location)
   
-  def locate(location:Location):List[ActorRef] = {
-//    println(locations)
+  def locate(location:Location) = {
     locations.filter(kv => {
       val (actor, actorLocation) = kv
       ((location.x - actorLocation.x) * (location.x - actorLocation.x)
         + (location.y - actorLocation.y) * (location.y - actorLocation.y)
       ) <= radius * radius
       }
-    ).keySet.toList
+    ).keySet.foreach( 
+      infectee => {
+        println(s"Infecting $infectee")
+        infectee ! Infect
+      }
+    )
   }
   
   def receive = {
     case Who => who()
     case Moved(location) => moved(location)
-    case Locate(location) => Future.successful(locate(location)).pipeTo(sender)
+    case Locate(location) => locate(location)
   }
 }
 

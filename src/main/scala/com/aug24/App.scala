@@ -34,7 +34,7 @@ object Population extends App {
 
   // Then start them coughing...
   val coughTimer = system.scheduler.scheduleWithFixedDelay(Duration.Zero, 50.milliseconds, justin, Cough(locator))
-  Thread.sleep(3000)
+  Thread.sleep(30000)
 
   //This cancels further Ticks to be sent
   moveTimer.cancel()
