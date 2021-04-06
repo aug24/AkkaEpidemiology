@@ -20,33 +20,18 @@ object Population extends App {
   val system = ActorSystem("Population")
   val justin = system.actorOf(FromConfig.props(Props[Justin]), "justin")
   val locator = system.actorOf(FromConfig.props(Props[Locator]), "locator")
+  val stats = system.actorOf(FromConfig.props(Props[Stats]), "stats")
 
+  locator ! Start(stats)
 
   import system.dispatcher
 
   val moveTimer = system.scheduler.scheduleWithFixedDelay(Duration.Zero, 500.milliseconds, justin, Move(locator))
 
-  // Allow people to mix a bit...
-  Thread.sleep(1000)
-
   // Set up patient zero
-  system.scheduler.scheduleOnce(1000.milliseconds, justin, Infect)
+  system.scheduler.scheduleOnce(1000.milliseconds, justin, Infect(stats))
 
   // Then start them coughing...
   val coughTimer = system.scheduler.scheduleWithFixedDelay(Duration.Zero, 50.milliseconds, justin, Cough(locator))
-  Thread.sleep(30000)
-
-  //This cancels further Ticks to be sent
-  moveTimer.cancel()
-  coughTimer.cancel()
-
-  // Allow a little longer for other threads to complete
-  Thread.sleep(3000)
-
-  val isTerminated = system.terminate()
-  isTerminated.onComplete {
-    case Success(result) => println(result)
-    case Failure(e) => e.printStackTrace()
-  }
 
 }

@@ -28,8 +28,8 @@ trait Person extends Actor with ActorLogging {
   def getInfected(): Boolean
 
   def who()
-  def infectMe()
-  def getWell()
+  def infectMe(stats: ActorRef)
+  def getWell(stats: ActorRef)
 
   import Protocol._
 
@@ -37,17 +37,14 @@ trait Person extends Actor with ActorLogging {
     case Who => who()
     case Move(locator) => move(locator)
     case Cough(locator) => cough(locator)
-    case Infect => infectMe()
-    case GetWell => getWell()
+    case Infect(stats) => infectMe(stats)
+    case GetWell(stats) => getWell(stats)
   }
 
   def cough(locator: ActorRef) = {
     if (getInfected()) {
-      println(s"$this is infected")
       val location = this.getLocation()
       val infecteesFuture = locator ! Locate(location)
-    } else {
-      println(s"$this is not infected")
     }
   }
 

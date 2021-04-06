@@ -1,4 +1,4 @@
-import akka.actor.{ActorSystem, Props, Actor, ActorLogging}
+import akka.actor.{ActorSystem, Props, Actor, ActorLogging, ActorRef}
 import scala.concurrent.Future
 import akka.pattern.pipe
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -15,21 +15,19 @@ class Justin extends Actor with ActorLogging with Person {
   def getInfected(): Boolean = { infected }
   def getImmune(): Boolean = { immune }
 
-  def getWell() = {
+  def getWell(stats: ActorRef) = {
     infected = false
     println(s"OMG! I'm healthy again! ($this)")
- //   println(this)
+    stats ! DecreaseCases
   }
 
-  def infectMe() = {
-//    println(this)
-//    println(getImmune())
+  def infectMe(stats: ActorRef) = {
     if (!getImmune()) {
       infected = true
       immune = true
       println(s"OMG! I'm infected ($this)")
-//      println(this)
-      val getWellTimer = context.system.scheduler.scheduleOnce(2500.milliseconds, self, GetWell)
+      stats ! IncreaseCases
+      val getWellTimer = context.system.scheduler.scheduleOnce(2500.milliseconds, self, GetWell(stats))
     }
   }
 
